@@ -1,6 +1,5 @@
 import requests as req
 import json
-import timeit
 
 
 url = "https://bg.annapurnapost.com/api/search?page={}&title={}"
