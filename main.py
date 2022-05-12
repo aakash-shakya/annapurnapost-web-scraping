@@ -31,7 +31,7 @@ def get_result(url, search_term, total_page):
     file = os.path.exists('./pageFailure.txt')
 
     if file:
-        with open('pageFailure.txt') as pf:
+        with open('pageFailure.txt','r') as pf:
             initial_page = int(pf.readline())+1
             
 
