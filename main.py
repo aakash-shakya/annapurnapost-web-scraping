@@ -1,3 +1,5 @@
+import os
+import sys
 import requests as req
 import json
 
@@ -5,11 +7,12 @@ import json
 url = "https://bg.annapurnapost.com/api/search?page={}&title={}"
 
 
-
-def get_totalPage(data):
+def get_totalPage(search_term):
     '''
         get total page to scrape about related searched term.
     '''
+    res = req.get(url.format(1,search_term))
+    data = res.json()
     total_page = data['data']['totalPage']
     print(f'\n total page number {total_page}')
     return total_page
@@ -23,13 +26,27 @@ def get_result(url, search_term, total_page):
     article_threshold = 30
     total_article = 0
     total_page = total_page + 1
+    initial_page = 1
 
-    for i in range(1, total_page):
+    file = os.path.exists('./pageFailure.txt')
+
+    if file:
+        with open('pageFailure.txt') as pf:
+            initial_page = int(pf.readline())
+
+
+    for i in range(0, total_page):
         print(f"\npagination {i}")
-        res = req.get(url.format(i,search_term))
-        data = res.json()
+       
 
         try:
+            res = req.get(url.format(i,search_term))
+            data = res.json()
+            
+            if data['error']:
+                raise res.raise_for_status()
+                
+
             if res.status_code == 200:
                 if data["status"] == 'success':
                     article_no = len(data['data'].get('items'))
@@ -44,14 +61,17 @@ def get_result(url, search_term, total_page):
                     
                     if not article_threshold<=0: 
                         print(f"article threshold remaining is {article_threshold}")
-                    
-                    
-
+            
+           
         
-        except:
+        except req.exceptions.HTTPError:
+            with open('pageFailure.txt', 'w') as p:
+                p.write(str(i))
             print(f"error occured for page {i}")
-            continue
-    
+            break
+            
+
+
     f.close()
 
     print("-----------------------------------------------")
@@ -64,8 +84,6 @@ def get_result(url, search_term, total_page):
 if __name__=="__main__":
     search_term = input("Enter search term: ")
 
-    res = req.get(url.format(1,search_term))
-    data = res.json()
 
-    total_page = get_totalPage(data)
+    total_page = get_totalPage(search_term)
     get_result(url, search_term, total_page)
