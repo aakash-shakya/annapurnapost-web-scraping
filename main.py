@@ -63,7 +63,7 @@ def get_result(url, search_term, total_page):
             
             except KeyboardInterrupt or req.exceptions.HTTPError or req.exceptions.ConnectionError:
                 with open('pageFailure.txt', 'w') as p:
-                    p.write(i)
+                    p.write(str(i))
                 print(f"error occured for page {i}")
                 break
                 
