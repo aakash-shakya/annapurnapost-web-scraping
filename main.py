@@ -32,9 +32,8 @@ def get_result(url, search_term, total_page):
 
     if file:
         with open('pageFailure.txt') as pf:
-            if not pf.readline()=='':   
-                initial_page = int(pf.readline())+1
-            pass
+            initial_page = int(pf.readline())+1
+            
 
     with open('articlefile.json', 'a', encoding='utf-8') as f:
 
@@ -62,9 +61,9 @@ def get_result(url, search_term, total_page):
                 
             
             
-            except KeyboardInterrupt:
+            except KeyboardInterrupt or req.exceptions.HTTPError or req.exceptions.ConnectionError:
                 with open('pageFailure.txt', 'w') as p:
-                    p.write(str(i))
+                    p.write(i)
                 print(f"error occured for page {i}")
                 break
                 
