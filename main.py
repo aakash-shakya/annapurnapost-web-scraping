@@ -26,50 +26,46 @@ def get_result(url, search_term, total_page):
     article_threshold = 30
     total_article = 0
     total_page = total_page + 1
-    initial_page = 1
+    initial_page = 0
 
     file = os.path.exists('./pageFailure.txt')
 
     if file:
         with open('pageFailure.txt') as pf:
-            initial_page = int(pf.readline())
+            initial_page = int(pf.readline())+1
 
+    with open('articlefile.json', 'a', encoding='utf-8') as f:
 
-    for i in range(0, total_page):
-        print(f"\npagination {i}")
-       
+        for i in range(initial_page, total_page):
+            print(f"\npagination {i}")
+        
 
-        try:
-            res = req.get(url.format(i,search_term))
-            data = res.json()
-            
-            if data['error']:
-                raise res.raise_for_status()
-                
+            try:
+                res = req.get(url.format(i,search_term))
+                data = res.json()
+                    
+                if res.status_code == 200:
+                    if data["status"] == 'success':
+                        article_no = len(data['data'].get('items'))
+                        article_threshold -= article_no
+                        total_article += article_no
 
-            if res.status_code == 200:
-                if data["status"] == 'success':
-                    article_no = len(data['data'].get('items'))
-                    article_threshold -= article_no
-                    total_article += article_no
-
-                    # writing json data in file
-                    with open('articlefile.json', 'a', encoding='utf-8') as f:
+                        # writing json data in file
                         print(f"writing the file")
                         json.dump(data['data']['items'], f, ensure_ascii=False, indent=4)
                         f.write(',')
-                    
-                    if not article_threshold<=0: 
-                        print(f"article threshold remaining is {article_threshold}")
+                        
+                        if not article_threshold<=0: 
+                            print(f"article threshold remaining is {article_threshold}")
+                
             
-           
-        
-        except req.exceptions.HTTPError:
-            with open('pageFailure.txt', 'w') as p:
-                p.write(str(i))
-            print(f"error occured for page {i}")
-            break
             
+            except KeyboardInterrupt:
+                with open('pageFailure.txt', 'w') as p:
+                    p.write(str(i))
+                print(f"error occured for page {i}")
+                break
+                
 
 
     f.close()
