@@ -32,7 +32,9 @@ def get_result(url, search_term, total_page):
 
     if file:
         with open('pageFailure.txt') as pf:
-            initial_page = int(pf.readline())+1
+            if not pf.readline()=='':   
+                initial_page = int(pf.readline())+1
+            pass
 
     with open('articlefile.json', 'a', encoding='utf-8') as f:
 
